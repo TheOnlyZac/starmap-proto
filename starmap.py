@@ -38,7 +38,7 @@ class cStarRecord:
         )
 
 class ViewMatrix:
-    def __init__(self, x=0, y=0, scale=0.5, translation_factor=100):
+    def __init__(self, x=0.0, y=0.0, scale=0.5, translation_factor=100):
         self.x = x
         self.y = y
         self.scale = scale
@@ -281,10 +281,12 @@ def main(stars_file="stars.bin"):
 
             # Draw UI
             font = pygame.font.Font(None, 16)
-            text = '({}, {}) @ {}x'.format(
+            text = 'Position: ({}, {})  Zoom: {}x'.format(
                 round(view.x, 2), round(view.y, 2), round(view.scale, 2))
-            text = font.render(text, 1, (255, 255, 255))
-            screen.blit(text, (10, 10))
+            blot = font.render(text, 1, (255, 255, 255))
+            screen.blit(blot, (10, 10))
+            blot = font.render('Prototype', 1, (255, 255, 255))
+            screen.blit(blot, (10, 26))
 
             # Update the display
             pygame.display.flip()
@@ -328,7 +330,6 @@ def main(stars_file="stars.bin"):
                     view.zoom(1.1)
                 elif event.y == -1:
                     view.zoom(1/1.1)
-
 
     # Quit Pygame
     pygame.quit()
