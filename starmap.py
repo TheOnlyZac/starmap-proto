@@ -1,7 +1,6 @@
 import struct
 import pygame
 
-STARS_FILE = "../stars2.bin"
 QTY_STARS = 42010
 SCREEN_SIZE = 800
 
@@ -172,10 +171,10 @@ def draw_star(screen, star, view=ViewMatrix()):
         return
 
     # Set the color and size of the star on the map
-    color = (star.unk[3], star.unk[3], star.unk[3])
+    color = (255, 255, 255)
     size = 1
 
-    '''if (star.type == 1): # galactic core
+    if (star.type == 1): # galactic core
         color = (255, 255, 255)
         size = 5
     elif (star.type == 2): # black hole
@@ -199,7 +198,7 @@ def draw_star(screen, star, view=ViewMatrix()):
     elif (star.type == 9): # blue-yellow
         color = (229, 189, 114)
     elif (star.type == 11): # yellow-red
-        color = (211, 105, 86)'''
+        color = (211, 105, 86)
 
     # Draw a point at the star position
     if view.scale >= 8:
@@ -237,10 +236,10 @@ def draw_star(screen, star, view=ViewMatrix()):
     #pygame.display.flip()
 
 
-def main():
-    stars = read_stars_from_file(STARS_FILE)
+def main(stars_file="stars.bin"):
+    stars = read_stars_from_file(stars_file)
 
-    # Initialize view
+    # Initialize view matrix
     view = ViewMatrix()
     
     # Initialize Pygame
@@ -253,9 +252,7 @@ def main():
     screen.fill((0, 0, 0))
 
     # Draw background image
-    ##image = pygame.image.load('bg.png')
-    # Blit the image onto the screen, scaling it to fit the screen size
-    ##screen.blit(pygame.transform.scale(image, screen.get_size()), (0, 0))
+    image = pygame.image.load('bg.png')
     
     # Run the game loop
     running = True
@@ -265,12 +262,17 @@ def main():
             # Clear the display
             screen.fill((0, 0, 0))
 
+            # Blit the bg image onto the screen only if it will fit
+            if (0.45 < view.scale < 0.55):
+                screen.blit(pygame.transform.scale(image, screen.get_size()), (0, 0))
+
             # Draw the stars on the screen
             draw_stars(screen, stars, view)
 
             # Draw UI
             font = pygame.font.Font(None, 16)
-            text = '({}, {}) @ {}x'.format(view.x, view.y, view.scale)
+            text = '({}, {}) @ {}x'.format(
+                round(view.x, 2), round(view.y, 2), round(view.scale, 2))
             text = font.render(text, 1, (255, 255, 255))
             screen.blit(text, (10, 10))
 
@@ -311,6 +313,7 @@ def main():
                     view.y = 0
                     do_redraw = True
             if event.type == pygame.MOUSEWHEEL:
+                #todo not working?
                 if event.y == 1:
                     view.zoom(1.1)
                 elif event.y == -1:
