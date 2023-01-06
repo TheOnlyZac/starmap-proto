@@ -170,68 +170,77 @@ def draw_star(screen, star, view=ViewMatrix()):
     if x < 0 or y < 0 or x > screen_width or y > screen_height:
         return
 
-    # Set the color and size of the star on the map
+    # Set default the color and size of the star to draw
     color = (255, 255, 255)
+    color2 = (255, 255, 255)
     size = 1
 
+    # Set color based on star type
     if (star.type == 1): # galactic core
         color = (255, 255, 255)
-        size = 5
     elif (star.type == 2): # black hole
         color = (0, 0, 255)
     elif (star.type == 3): # proto-planetary disks
         color = (143, 143, 255)
     elif (star.type == 6): # red
         color = (211, 105, 86)
-    elif (star.type == 12): # red-red
-        color = (242, 80, 48)
     elif (star.type == 5): # blue
         color = (100, 179, 252)
+    elif (star.type == 4): # yellow
+        color = (229, 189, 114)  
+    elif (star.type == 12): # red-red
+        color = (242, 80, 48)
+        color2 = (242, 80, 48)
     elif (star.type == 7): # blue-blue
         color = (143, 255, 255)
-    elif (star.type == 4): # yellow
-        color = (229, 189, 114)
+        color2 = (143, 255, 255)
     elif (star.type == 10): # yellow-yellow
         color = (215, 178, 56)
+        color2 = (215, 178, 56)
     elif (star.type == 8): # blue-red
-        color = (100, 179, 252)
+        color = (143, 255, 255)
+        color2 = (242, 80, 48)
     elif (star.type == 9): # blue-yellow
-        color = (229, 189, 114)
+        color = (143, 255, 255)
+        color2 = (215, 178, 56)
     elif (star.type == 11): # yellow-red
-        color = (211, 105, 86)
+        color = (215, 178, 56)
+        color2 = (242, 80, 48)
+        
 
-    # Draw a point at the star position
+    # Draw star at it's screen position with varying detail based on viewport scale
     if view.scale >= 8:
+        # Draw primary star
         pygame.draw.circle(screen, color, (x, y), int(size * view.scale / 8))
-        if (view.scale >= 32):
-            # Draw star name to bottom-right of circle
-            font = pygame.font.Font(None, int(4 * view.scale/10))
-            text = font.render(name, 1, (255, 255, 255))
-            screen.blit(text, (x, y))
+        
+        if (view.scale >= 16):
+            # Draw secondary star if binary system
+            if star.type in [12, 7, 10, 8, 9, 11]:
+                pygame.draw.circle(screen, color2, (x-6, y), int(size * view.scale / 8))
+                
+            if (view.scale >= 32):
+                font = pygame.font.Font(None, int(4 * view.scale/10))
+                # Draw star name to bottom-right of circle
+                text = font.render(name, 1, (255, 255, 255))
+                screen.blit(text, (x, y))
     else:
         screen.set_at((x, y), color)
 
     # Prominently redraw special star systems
     if (view.scale < 32):
-        if (star.name == 'Sol'):
+        if (star.name in ['Sol', 'Treus-8']):
             color = (255, 255, 255)
-            size = 3
-            font = pygame.font.Font(None, 14)
+            size = 2
             pygame.draw.circle(screen, color, (x, y), size)
-            text = font.render('Sol', 1, color)
+            font = pygame.font.Font(None, 14)
+            text = font.render(star.name, 1, color)
             screen.blit(text, (x+2, y+2))
         elif (star.name == 'Galactic Core'):
-            font = pygame.font.Font(None, 14)
-            text = font.render('Galactic Core', 1, color)
-            pygame.draw.circle(screen, color, (x, y), size)
-            screen.blit(text, (x+3, y+3))
-        elif (star.name == 'Treus-8'):
-            color = (255, 255, 255)
             size = 3
-            font = pygame.font.Font(None, 14)
             pygame.draw.circle(screen, color, (x, y), size)
-            text = font.render('Treus-8', 1, color)
-            screen.blit(text, (x+2, y+2))
+            font = pygame.font.Font(None, 14)
+            text = font.render(star.name, 1, color)
+            screen.blit(text, (x+3, y+3))
 
     #pygame.display.flip()
 
@@ -244,6 +253,7 @@ def main(stars_file="stars.bin"):
     
     # Initialize Pygame
     pygame.init()
+    pygame.display.set_caption("Star Map Prototype")
 
     # Create a Pygame screen
     screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
@@ -262,8 +272,8 @@ def main(stars_file="stars.bin"):
             # Clear the display
             screen.fill((0, 0, 0))
 
-            # Blit the bg image onto the screen only if it will fit
-            if (0.45 < view.scale < 0.55):
+            # Blit the bg image onto the screen only if it will fit perfectly
+            if ((0.45 < view.scale < 0.55) and (-1 < view.x < 1) and (-1 < view.y < 1)):
                 screen.blit(pygame.transform.scale(image, screen.get_size()), (0, 0))
 
             # Draw the stars on the screen
